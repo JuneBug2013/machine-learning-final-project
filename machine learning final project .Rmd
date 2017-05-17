@@ -1,0 +1,124 @@
+---
+title: "machine learning project"
+author: "jie wang"
+date: "May 14, 2017"
+output: html_document
+---
+
+## Introduction 
+One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants is used to predict the manner in which they did the exercise. 
+
+They were asked to perform barbell lifts correctly and incorrectly in 5 different ways.The five ways are exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). Only Class A corresponds to correct performance. The goal of this project is to predict the manner in which they did the exercise, i.e., Class A to E.
+
+## Install and load the necessary package
+
+library(knitr)
+
+library(caret)
+
+## Data Preparation 
+```{r}
+training <- read.csv("pml-training.csv")
+testing <- read.csv("pml-testing.csv")
+str(training) 
+str(testing)
+```
+##cleaning data.
+As seen from the above listing, the datasets has many NAs,zero variance variables  and non predictable variables. so data cleaning is from the three aspects.
+
+Remove NAs.
+
+```{r}
+library(caret)
+nvz1 <- nearZeroVar(training)
+training <- training[,-nvz1]
+```
+
+Remove zero variance variables and non predictable variables.
+
+ ```{r}
+cleanData <- function(clean)
+{idx.keep <- !sapply(clean, function(x) any(is.na(x)))
+clean <- clean[, idx.keep]
+idx.keep <- !sapply(clean, function(x) any(x==""))
+clean <- clean[, idx.keep]
+npr <- c("X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", 
+            "cvtd_timestamp", "new_window", "num_window")
+npr.rm <- which(colnames(clean) %in% npr)
+clean <- clean[, -npr.rm]
+return(clean)
+}
+training <- cleanData(training)
+finalTraining <- training
+dim(finalTraining)
+```
+
+Follow the same procedure to clean the testing set.
+```{r}
+nvz2 <- nearZeroVar(testing)
+testing <- testing[,-nvz2]
+testing <- cleanData(testing)
+finalTesting <- testing
+dim(finalTesting)
+```
+
+Partioning the training data set into two parts.
+```{r}
+inTrain <- createDataPartition(finalTraining$classe, p=0.75, list=FALSE)
+myTraining <- finalTraining[inTrain,]
+myTesting <- finalTraining[-inTrain,]
+dim(myTraining)
+dim(myTesting)
+```
+
+##Correlation Analysis
+
+```{r}
+corMatrix <- cor(myTraining[, -53])
+library(corrplot)
+corrplot(corMatrix, order = "FPC", method = "color", type = "lower", 
+         tl.cex = 0.2, tl.col = rgb(0, 0, 0))
+```
+
+The highly correlated variables are shown in darker colors in the plot above.  Usually a PCA (Principal Components Analysis) is  conducted as a pre-processing steps when the correlations among the variables are high.  
+This step is skipped in this assignment cause there are new high correlations.
+
+## Different Models 
+
+Two different machine learning algoritms are choosen to run the mulations, which are Random Forest and Decision Trees.
+
+##  Method 1 Random Forest
+```{r}
+set.seed(1234)
+library(randomForest)
+modFit1 <- randomForest(classe ~ ., data=myTraining)
+prediction1 <- predict(modFit1, myTesting, type = "class")
+rf <- confusionMatrix(prediction1, myTesting$classe)
+rf
+plot(rf$table, col = rf$byClass, main = paste("Random Forest Confusion Matrix: Accuracy =", round(rf$overall['Accuracy'], 4)))
+```
+The accuracy is .9957.
+
+## Method 2 Decision Tree
+```{r}
+set.seed(1234)
+library(rpart)
+library(rpart.plot)
+modFit2 <- rpart(classe ~ ., data=myTraining, method="class")
+predictions1 <- predict(modFit2, myTesting, type = "class")
+dctree <- confusionMatrix(predictions1, myTesting$classe)
+dctree
+plot(dctree$table, col =dctree$byClass, main = paste("Decision Tree Confusion Matrix: Accuracy =", round(dctree$overall['Accuracy'], 4)))
+```
+The accuracy is .7537.
+
+The above comparsion shows that random forest did a better job in prediting the results than decision tree, therefore, it is choosen to predit on the test data. 
+
+## Predicting on the Test Data
+```{r}
+prediction_test <- predict(modFit1,finalTesting, type = "class")
+prediction_test
+```
+
+
+
