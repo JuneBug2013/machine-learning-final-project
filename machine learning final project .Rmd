@@ -98,8 +98,6 @@ rf
 plot(rf$table, col = rf$byClass, main = paste("Random Forest Confusion Matrix: Accuracy =", round(rf$overall['Accuracy'], 4)))
 ```
 
-The accuracy is .998.The out of sample error is 1-.998 = .002 = .2%
-
 ## Method 2 Decision Tree
 ```{r}
 set.seed(1234)
@@ -112,8 +110,6 @@ dctree
 plot(dctree$table, col =dctree$byClass, main = paste("Decision Tree Confusion Matrix: Accuracy =", round(dctree$overall['Accuracy'], 4)))
 ```
 
-The accuracy is .747. The out of sample error is 1-.747 = .253 = 25.3%
-
 The above comparsion shows that random forest did a better job in prediting the results than decision tree,with higher accuracy, therefore, it is choosen to predit on the test data. 
 
 ## Predicting on the Test Data
@@ -123,7 +119,7 @@ prediction_test
 ```
 
 ## Out of sample error
- Using the random forest method, the out of  sample error rate is 0.2%  as listed in the previous method section.
+Using the random forest method, the out of  sample error rate is 1-accuracy (as listed in the previous method 1 section), which is about .2%-.4% (running the Rmd files several times, the results of accuracy slightly changed in different simulations, but is always within the range.96 to .98.)
 
 
 
