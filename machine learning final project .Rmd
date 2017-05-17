@@ -23,7 +23,7 @@ testing <- read.csv("pml-testing.csv")
 str(training) 
 str(testing)
 ```
-##cleaning data.
+##Cleaning data.
 As seen from the above listing, the datasets has many NAs,zero variance variables  and non predictable variables. so data cleaning is from the three aspects.
 
 Remove NAs.
@@ -97,7 +97,8 @@ rf <- confusionMatrix(prediction1, myTesting$classe)
 rf
 plot(rf$table, col = rf$byClass, main = paste("Random Forest Confusion Matrix: Accuracy =", round(rf$overall['Accuracy'], 4)))
 ```
-The accuracy is .9957.
+
+The accuracy is .998.The out of sample error is 1-.998 = .002 = .2%
 
 ## Method 2 Decision Tree
 ```{r}
@@ -110,15 +111,19 @@ dctree <- confusionMatrix(predictions1, myTesting$classe)
 dctree
 plot(dctree$table, col =dctree$byClass, main = paste("Decision Tree Confusion Matrix: Accuracy =", round(dctree$overall['Accuracy'], 4)))
 ```
-The accuracy is .7537.
 
-The above comparsion shows that random forest did a better job in prediting the results than decision tree, therefore, it is choosen to predit on the test data. 
+The accuracy is .747. The out of sample error is 1-.747 = .253 = 25.3%
+
+The above comparsion shows that random forest did a better job in prediting the results than decision tree,with higher accuracy, therefore, it is choosen to predit on the test data. 
 
 ## Predicting on the Test Data
 ```{r}
 prediction_test <- predict(modFit1,finalTesting, type = "class")
 prediction_test
 ```
+
+## Out of sample error
+ Using the random forest method, the out of  sample error rate is 0.2%  as listed in the previous method section.
 
 
 
